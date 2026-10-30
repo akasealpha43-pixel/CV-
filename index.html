@@ -734,10 +734,14 @@
                     </div>
                     <textarea id="quote-details" rows="3" placeholder="Présentez brièvement vos objectifs (ex: créer un site web vitrine et 2 vidéos publicitaires pour le lancement)..." class="w-full bg-brand-surface border border-brand-border rounded-xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors reveal-item"></textarea>
 
-                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-emerald-600 text-white font-bold text-sm tracking-wide shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 reveal-item">
-                        <i class="fa-solid fa-paper-plane text-xs"></i>
-                        <span>Envoyer Mon Brief & Recevoir Mon Devis Officiel</span>
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-emerald-600 text-white font-bold text-sm tracking-wide shadow-xl transition-all flex items-center justify-center gap-2 reveal-item">
+                        <i class="fa-solid fa-envelope text-xs"></i>
+                        <span>Envoyer ma demande de devis par email</span>
                     </button>
+                    <a href="https://wa.me/237657876536?text=Bonjour%20Alpha%2C%20je%20souhaite%20discuter%20de%20vos%20services." target="_blank" rel="noopener noreferrer" class="w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1fbd5b] text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 reveal-item">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>Discuter sur WhatsApp (sans envoyer de devis)</span>
+                    </a>
                 </form>
             </div>
 
@@ -868,6 +872,10 @@
             </div>
         </div>
     </footer>
+
+    <a href="https://wa.me/237657876536?text=Bonjour%20Alpha%2C%20je%20souhaite%20avoir%20des%20informations%20sur%20vos%20services." target="_blank" rel="noopener noreferrer" aria-label="Écrire directement sur WhatsApp" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1fbd5b] text-white shadow-2xl flex items-center justify-center text-3xl transition-transform hover:scale-110">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <!-- Interactive Scripts & Smooth Engine -->
     <script>
@@ -1232,13 +1240,37 @@
         // 10. Form Submissions
         function handleQuoteSubmit(e) {
             e.preventDefault();
-            const name = document.getElementById('quote-name').value;
-            const email = document.getElementById('quote-email').value;
+            const name = document.getElementById('quote-name').value.trim();
+            const email = document.getElementById('quote-email').value.trim();
             const total = document.getElementById('quote-total').innerText;
+            const details = document.getElementById('quote-details').value.trim();
+            const selectedServices = [...document.querySelectorAll('.service-checkbox:checked')]
+                .map(input => input.parentElement.querySelector('span.block').innerText);
 
-            showToast(`Merci ${name} ! Votre estimation (${total}) a été enregistrée. Détails envoyés à ${email}.`);
-            document.getElementById('quote-form').reset();
-            calculateQuote();
+            if (!selectedServices.length) {
+                showToast('Veuillez sélectionner au moins une prestation.');
+                return;
+            }
+
+            const urgency = document.getElementById('urgency-select');
+            const maintenance = document.getElementById('maintenance-select');
+            const subject = `Demande de devis - ${name}`;
+            const body = [
+                'Bonjour Alpha,', '',
+                'Je souhaite obtenir un devis pour :',
+                ...selectedServices.map(service => `- ${service}`), '',
+                `Budget estimatif : ${total}`,
+                `Délai : ${urgency.options[urgency.selectedIndex].text}`,
+                `Support : ${maintenance.options[maintenance.selectedIndex].text}`, '',
+                `Nom / Entreprise : ${name}`,
+                `Email : ${email}`,
+                `Description : ${details || 'Non précisée'}`, '',
+                'Merci de me recontacter.'
+            ].join('\\n');
+
+            // mailto prépare le message ; le visiteur confirme l'envoi dans son application email.
+            window.location.href = `mailto:akasealpha43@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            showToast('Votre email est préparé. Confirmez son envoi dans votre messagerie.');
         }
 
         function handleContactSubmit(e) {
